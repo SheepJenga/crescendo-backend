@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/go-chi/chi"
+	"github.com/SheepJenga/crescendo/internal/server"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -18,6 +18,14 @@ func main() {
 		log.Fatalln("PORT must be set")
 	}
 
-	router := chi.NewRouter()
+	svr, err := server.NewServer()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
+	log.Println("Server listening on port", portStr)
+	err = svr.ListenAndServe()
+	if err != nil {
+		log.Fatalln(err)
+	}
 }
