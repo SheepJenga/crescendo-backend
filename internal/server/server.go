@@ -8,14 +8,12 @@ import (
 	"os"
 )
 
-func newRouter() http.Handler {
+func newV1Router() http.Handler {
 	router := chi.NewRouter()
 
-	router.Use(cors.Handler(cors.Options{
-		AllowedOrigins: []string{"http://*", "https://*"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-	}))
-
+	router.Get("/healthz", handlerReadiness)
+	router.Get("/err", handlerError)
+	
 	return router
 }
 
@@ -25,7 +23,16 @@ func NewServer() (*http.Server, error) {
 		log.Fatalln("PORT must be set")
 	}
 
-	router := newRouter()
+	router := chi.NewRouter()
+
+	router.Use(cors.Handler(cors.Options{
+		AllowedOrigins: []string{"http://*", "https://*"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	}))
+
+	v1Router := newV1Router()
+
+	router.Mount("/v1", v1Router)
 
 	server := &http.Server{
 		Addr:    ":" + portStr,
@@ -33,10 +40,4 @@ func NewServer() (*http.Server, error) {
 	}
 
 	return server, nil
-
-	//log.Println("Server listening on port", portStr)
-	//err = server.ListenAndServe()
-	//if err != nil {
-	//	log.Fatalln(err)
-	//}
 }
